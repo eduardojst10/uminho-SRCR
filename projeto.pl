@@ -12,7 +12,7 @@
 %:- style_check(-singleton).
 
 
-:- op( 900, xfy,'::' ).
+:- op( 1100, xfy,'::' ).
 :- dynamic utente/10.
 :- dynamic centro_saude/5.
 :- dynamic staff/4.
@@ -34,9 +34,10 @@ utente(2,'2341',monteiro,07/5/1999,'mach@mail.com','93566278',porto,taxista,[can
 utente(3,'3412',torgal,01/9/1989,'dsaw@mail.com','93436988',guimaraes,fazendeiro,[bronquite],2).
 utente(4,'4123',mariana,19/3/1979,'ds@mail.com','91236278',braga,tenista,[asma,hipertensao],1).
 utente(5,'1124',ze,10/2/1972,'opisa@mail.com','91244012',chaves,camionista,[diabetes],3).
-utente(6,'1134',margarida,08/12/1994,'opisa@mail.com','91244536',lisboa,policia,[asma],3).
-utente(7,'1572',daniela,15/03/1982,'opisa@mail.com','91243671',felgueiras,medica,[hipertensao],3).
-utente(8,'1002',martim,24/1/1978,'opisa@mail.com','91240116',chaves,atleta,[],3).
+utente(6,'1134',margarida,08/12/1953,'opisa@mail.com','91244536',lisboa,policia,[asma],3).
+utente(7,'1572',daniela,15/03/1970,'opisa@mail.com','91243671',felgueiras,medica,[hipertensao],3).
+utente(8,'1002',martim,24/1/1978,'opisa@mail.com','91240116',chaves,enfermeiro,[],3).
+
 
 %centro_saude: #Idcentro, Nome, Morada, Telefone, Email ↝ { 𝕍, 𝔽}
 centro_saude(1,'Alto_Ave',povoa,'234145167','alto@mail.com').
@@ -56,69 +57,63 @@ staff(3,3,'Ana','charrada@mail.com').
 
 
 %vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma↝ { 𝕍, 𝔽 }
+
 %vacinacao_Covid(5,8,'14/02/21','outra',0).
 %vacinacao_Covid(2,6,'14/02/21','outra',0).
 %vacinacao_Covid(2,7,'15/02/21','pfizer',0).
-vacinacao_Covid(1,4,'01/03/21','pfeizer',1).
-vacinacao_Covid(3,3,'01/03/21','pfeizer',1).
-vacinacao_Covid(3,2,'21/03/21','pfeizer',1).
-vacinacao_Covid(2,1,'14/02/21','outra',1).
-vacinacao_Covid(3,2,'21/03/21','pfeizer',2).
-vacinacao_Covid(5,5,'21/03/21','pfeizer',2).
+vacinacao_Covid(1,4,01/03/21,pfeizer,1).
+vacinacao_Covid(3,3,01/03/21,pfeizer,1).
+vacinacao_Covid(3,2,21/03/21,pfeizer,1).
+vacinacao_Covid(5,1,14/02/21,pfeizer,1).
+vacinacao_Covid(3,2,21/03/21,pfeizer,2).
+vacinacao_Covid(5,1,21/03/21,pfeizer,2).
 
 %profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
 profissoes_risco([medico,enfermeiro,auxiliar_limpeza,auxiliar_lar,professor,auxiliar_escola,policia]).
 
-
-
-
-%%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-%------------------------------- Invariantes Estruturais -----------------
-
+%fase:#utente,fase ↝ { 𝕍, 𝔽 }
+fase(6,1).
+fase(7,2).
+fase(8,3).
 
 
 
 
+%------------------------------- Invariantes Estruturais ------------------------------
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   - UTENTE
 %Invariante Estrutural: para nao permitir inserção de ocorrências de conhecimento repetido a nivel de utente
 +utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO) :: (findall( (IDU,IDCENTRO), utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO),S),
                	comprimento(S,N), N == 1).
 
-%Invariante Referencial: Não remover utente que nao esteja na Base de Conhecimento
+%Invariante Estrutural: Não remover utente que nao esteja na Base de Conhecimento
 -utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO) :: (findall( (IDU,_,_,_,_,_,_,_,_,IDCENTRO), (utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO)),S),
                	comprimento(S,N),
                 N ==0).
 
--utente( Id,_,_,_ ) :: (
-				  findall( (Id),(consulta(_,_,Id,_,_)),S ),
-                  comprimento( S,N ),
-				  N == 0).
-
-
-%ID sao inteiros
-+utente(Id,_,_,_) :: (
-	integer(Id)
+%Invariante Referencial - ID sao inteiros
++utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO) :: (
+	integer(IDU),
+    integer(IDCENTRO)
 ).
 
-+utente(_,_,Id,_) :: (
-	integer(Id)
-).
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -CENTRO_SAUDE
 
 
-%Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de centro_saúde - Verificar se está bem
-+centro_saude(ID,_,_,_,_) :: (findall( (ID), (centro_saude(ID,_,_,_,_)),S),
+%Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de centro_saúde 
++centro_saude(IDCENTRO,_,_,_,_) :: (findall( (IDCENTRO), (centro_saude(IDCENTRO,_,_,_,_)),S),
                	comprimento(S,N),
                 N == 1).
 
-%Invariante Referencial: Não remover centro_Saude que nao esteja na Base de Conhecimento
--centro_saude(IDU,_,_,_,_) :: (findall( (IDU), (centro_saúde(IDU,_,_,_,_)),S),
+%Invariante Estrutural: Não remover centro_Saude que nao esteja na Base de Conhecimento
+-centro_saude(IDCENTRO,_,_,_,_) :: (findall( (IDCENTRO), (centro_saude(IDCENTRO,_,_,_,_)),S),
                	comprimento(S,N),
                 N ==0).
-
-
+%Invariante Referencial - ID inteiro
++centro_saude(IDCENTRO,_,_,_,_) :: (
+    integer(IDCENTRO)
+).
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -STAFF
 
@@ -126,24 +121,43 @@ profissoes_risco([medico,enfermeiro,auxiliar_limpeza,auxiliar_lar,professor,auxi
 +staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO,_,_), (staff(IDS,IDCENTRO,_,_)),S),
                	comprimento(S,N),
                 N ==1).
-%Invariante Referencial: Não remover staff que nao esteja na Base de Conhecimento
--staff(IDU,IDCENTRO,_,_) :: (findall( (IDU,IDCENTRO,_,_), (staff(IDU,IDCENTRO,_,_)),S),
+%Invariante Estrutural: Não remover staff que nao esteja na Base de Conhecimento
+-staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO,_,_), (staff(IDS,IDCENTRO,_,_)),S),
                	comprimento(S,N),
                 N ==0).
 
-
+%Invariante Referencial - IDs sao inteiros
++staff(IDS,IDCENTRO,_,_) :: (
+	integer(IDS),
+    integer(IDCENTRO)
+).
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -VACINACAO_COVID
-%Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de vacinacao_Covid, nao pode existir vacinanoes repetidas
-+vacinacao_Covid(ID,STAFF,_,_,T) :: (findall((ID,STAFF), (vacinacao_Covid(ID,STAFF,_,_,T)),S),
+%Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de vacinacao_Covid
++vacinacao_Covid(ID,IDSTAFF,_,_,T) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,T)),S),
                     comprimento(S,N),
                 N == 1).
-%
-%-vacinacao_Covid(ID,SAFF,_,_,_) :: (findall((ID,STAFF), (vacinacao_Covid(ID,STAFF,_,_,_)),S),
-%                    comprimento(S,N),
-%                    N =< 2).
+%Invariante Estrutural: Não remover vacinacao que nao esteja na Base de Conhecimento
+-vacinacao_Covid(ID,IDSAFF,_,_,_) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,_)),S),
+                    comprimento(S,N),
+                    N == 0).
+
+%Invariante Referencial
++vacinacao_Covid(_,_,_,_,T)::(
+    T=1; %operador de disjuncao -> ;
+    T=2
+).
+%%--------------------------------- - - - - - - - - - -  -  -  -  -   -FASE
 
 
+
+%Invariante Referencial - IDs sao inteiros
++fase(IDU,IDF) :: (
+	integer(IDU),
+    IDF = 1;
+    IDF=2;
+    IDF=3
+).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
@@ -158,7 +172,8 @@ profissoes_risco([medico,enfermeiro,auxiliar_limpeza,auxiliar_lar,professor,auxi
 
 
 %---------------------------QUERIES-----------------------------------
-%--------------------------<1>-------------------------------------
+
+%--------------------------<1>---------------------------------------------------------------------------
 
 %definir predicados para as diferentes fases de vacinacao
 
@@ -166,7 +181,8 @@ profissoes_risco([medico,enfermeiro,auxiliar_limpeza,auxiliar_lar,professor,auxi
 %%Utente pertence à 1ª fase de vacinacao se a sua idade for maior ou igual a 65.
 
 registaUtenteFase1(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):-verificaIdade(X/Y/Z),
-                                                                    evolucao(utente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro)).
+                                                                    evolucao(utente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro)),
+                                                                    evolucao(fase(ID,1)).
 
 
 verificaIdade(X/Y/Z):- A is 2021-Z,
@@ -177,8 +193,8 @@ verificaIdade(X/Y/Z):- A is 2021-Z,
 %Utente pertence à 2ª fase de vacinacao se possuir doenças crónicas
 registaUtenteFase2(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- comprimento(Doenca,N),
                                                                         N>=1,
-                                                                        evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)).
-
+                                                                        evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
+                                                                        evolucao(fase(ID,2)).
 
 
 
@@ -186,29 +202,17 @@ registaUtenteFase2(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- compri
 %Utente pertence à 3ª fase de vacinacao se possuir uma profissão de risco
 registaUtenteFase3(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- profissoes_risco(L),
                                                                         pertence(Prof,L),
-                                                                        evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)).
-
-%--------------------------<2>-------------------------------------
+                                                                        evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
+                                                                        evolucao(fase(ID,3)).
+%--------------------------<2>------------------------------------------------------------------------------
 %Identifica utentes nao vacinados  
 identificaUtentesNaoVacinados(L):- findall((ID),utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),U),
                                   utentesIdVacinados(N),
-                                  remove(U,N,L).
+                                  eliminarComuns(N,U,X),
+                                  agrupaUtentesID(X,L).
+                                
 
-
-removeVacinados(U,[],U).
-removeVacinados([],N,[]).
-removeVacinados(U,[H|T],L):- removeVacinados(U,T,L1), 
-                         removeTodasOcorrencias(H,U,L).
-                            
-
-removeTodasOcorrencias(X,[],[]).
-removeTodasOcorrencias(X,[X|T],L):- removeTodasOcorrencias(X,T,L),!.
-removeTodasOcorrencias(X,[H|T],[H|L]):- removeTodasOcorrencias(X,T,L). %adicionar 
-
-
-%Fazer um agrupa contrário ao de baixo
-
-%--------------------------<3>-------------------------------------
+%--------------------------<3>----------------------------------------------------------------------------------
 %Identifica utentes vacinados 
 identificaUtentesVacinados(L):- utentesIdVacinados(N),
                              agrupaUtentesID(N,L).                               
@@ -223,7 +227,7 @@ agrupaUtentesID([],[]).
 agrupaUtentesID([H|T],[X|Xs]):- agrupaUtentesID(T,Xs),
                                 listaUtentes(H,[X]).
 
-%--------------------------<4>-------------------------------------
+%--------------------------<4>-------------------------------------------------------------------------------------
 %Identifica Utentes bem vacinados
 %utentes por toma, neste caso a toma vai ser 2
 
@@ -234,24 +238,33 @@ identificaUtentesBemVacinados(L):-
 
 %Predicado que lista os utentes por id
 listaUtentes(Id,Lista):-findall((Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),utente(Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),Lista).
-%--------------------------<5>-------------------------------------
+%--------------------------<5>--------------------------------------------------------------------------------------
+%Identificar pessoas não vacinadas e que são candidatas a vacinação
+% Ir buscar as pessoas nao vacinadas e verificar se estão na 1ª,2ª ou 3ª fase
 
-%--------------------------<6>-------------------------------------
+identificaFase(L,N):- findall((ID),fase(ID,N),X),
+                    agrupaUtentesID(X,L).
+
+                    
+
+%--------------------------<6>---------------------------------------------------------------------------------------
+%Identificar pessoas a quem falta a segunda toma da vacina;
+
+identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1),L1),
+                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2),L2),
+                    eliminarComuns(L2,L1,X),
+                    agrupaUtentesID(X,L).
+                    
 
 %--------------------------<7>-------------------------------------
-
-%Sistema de Inferência
-
-%si(Questao,verdadeiro):-
-%   Questao.
-%si(Questao,falso):-
-%   -Questao.
+%Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas.
 
 
+% Extensao do meta-predicado nao: Questao -> {V,F}
+si( Questao,verdadeiro ) :- Questao.
+si( Questao,falso ) :- -Questao.
 
-%nao(Questao):-
-%    Questao,!,fail.
-%nao(Questao).
+
 
 
 
@@ -269,10 +282,9 @@ concatenar([],L,L).
 concatenar(L,[],L).
 concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
 
-%remove elementos duplicados
+%Predicado que remove elementos duplicados
 
 remove_duplicados(LI,LF):-remove(LI,[],LF).
-
 
 %Se não pertencer adiciona à cabeça da nossa lista vazia
 remove([],L,L).
@@ -284,6 +296,21 @@ remove([H|T],L,X):- remove(T,[H|L],X).
 comprimento([],0).
 comprimento([X|L], C) :- comprimento(L, N), C is N+1.
 
+
+
+%Funçao que elimina elementos comuns de uma lista noutra skrskr
+%(lista de itens a retirar , lista onde se retira , lista return)
+eliminarComuns([],[],L).
+eliminarComuns(N,[],[]).
+eliminarComuns([],N,N).
+eliminarComuns([H|T],N,L):-removeTodasOcorrenciasElemento(H,N,L1),
+                         eliminarComuns(T,L1,L).
+
+
+%Extensao do Predicado para remover todas as ocorrencias de uma elemento
+removeTodasOcorrenciasElemento(X,[],[]).
+removeTodasOcorrenciasElemento(X,[X|T],L):- removeTodasOcorrenciasElemento(X,T,L),!.
+removeTodasOcorrenciasElemento(X,[H|T],[H|L]):- removeTodasOcorrenciasElemento(X,T,L). %adicionar 
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
