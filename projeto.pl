@@ -9,15 +9,13 @@
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 
-%:- style_check(-singleton).
-
-
 :- op( 1100, xfy,'::' ).
 :- dynamic utente/10.
 :- dynamic centro_saude/5.
 :- dynamic staff/4.
 :- dynamic vacinacao_Covid/5.
 :- dynamic profissoes_risco/1.
+:- dynamic fase/2.
 
 
 % utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
@@ -29,51 +27,74 @@
 %----------------------------- BASE DE CONHECIMENTO ------------------------
 
 % utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
-utente(1,'1234',eduardo,10/1/1999,'eduardo@mail.com','93436278',fafe,estudante,[asma,diabetes],1).
-utente(2,'2341',monteiro,07/5/1999,'mach@mail.com','93566278',porto,taxista,[cancro],3).
-utente(3,'3412',torgal,01/9/1989,'dsaw@mail.com','93436988',guimaraes,fazendeiro,[bronquite],2).
-utente(4,'4123',mariana,19/3/1979,'ds@mail.com','91236278',braga,tenista,[asma,hipertensao],1).
-utente(5,'1124',ze,10/2/1972,'opisa@mail.com','91244012',chaves,camionista,[diabetes],3).
-utente(6,'1134',margarida,08/12/1953,'opisa@mail.com','91244536',lisboa,policia,[asma],3).
-utente(7,'1572',daniela,15/03/1970,'opisa@mail.com','91243671',felgueiras,medica,[hipertensao],3).
-utente(8,'1002',martim,24/1/1978,'opisa@mail.com','91240116',chaves,enfermeiro,[],3).
+utente(1,'1234',eduardo,10/1/1999,'eduardo@mail.com','93436278',fafe,estudante,[asma,diabetes],1).%FASE2
+utente(2,'2341',monteiro,07/5/1999,'mach@mail.com','93566278',porto,taxista,[],3).%FASE4
+utente(3,'3412',torgal,01/9/1989,'dsaw@mail.com','93436988',guimaraes,medico,[],2).%FASE4
+utente(4,'4123',mariana,19/3/1979,'ds@mail.com','91236278',braga,tenista,[asma,hipertensao],1).%FASE2
+utente(5,'1124',ze,10/2/1972,'opisa@mail.com','91244012',chaves,camionista,[bronquite],3).%FASE2
+
+utente(6,'1134',margarida,08/12/1953,'opisa@mail.com','91244536',lisboa,policia,[asma],3).%FASE 1
+utente(7,'1572',daniela,15/03/1970,'opisa@mail.com','91243671',felgueiras,medica,[hipertensao],3). %FASE2
+utente(8,'1002',martim,24/1/1978,'opisa@mail.com','91240116',chaves,enfermeiro,[],3).%FASE 3
+
+utente(9,'2564',roberta,11/12/1973,'opisa@mail.com','91244536',lisboa,medica,[asma],3).%FASE 2
+utente(10,'7072',david,13/03/1960,'opisa@mail.com','91243671',felgueiras,enfermeiro,[hipertensao],3).%FASE2
+utente(11,'4102',manuel,20/01/1948,'opisa@mail.com','91240116',chaves,policia,[],3).%FASE1
+
 
 
 %centro_saude: #Idcentro, Nome, Morada, Telefone, Email ↝ { 𝕍, 𝔽}
 centro_saude(1,'Alto_Ave',povoa,'234145167','alto@mail.com').
-centro_saude(2,'Chaves',chaves,'234145006','ch@mail.com').
-centro_saude(3,'Bzaina',portalegre,'254178167','bza@mail.com').
+centro_saude(2,'Centro saude',fafe,'254458167','saude@mail.com').
+centro_saude(3,'Chaves Centro',chaves,'234145006','ch@mail.com').
+centro_saude(4,'Centro_L',lisboa,'254171267','za@mail.com').
+centro_saude(5,'Riba Centro',lisboa,'250878167','riza@mail.com').
 
 %staff: #Idstaff, #Idcentro, Nome, email ↝ { 𝕍, 𝔽 }
-staff(1,1,'Rita','rti@mail.com').
-staff(2,1,'Juan','juanito@mail.com').
-staff(3,1,'Ramon','salmon@mail.com').
-staff(4,1,'Rui','ti@mail.com').
-staff(1,2,'Gili','gilberto@mail.com').
-staff(2,2,'ZecaAfonso','zeca@mail.com').
-staff(1,3,'Moura','çaledge@mail.com').
-staff(2,3,'Belo','li4@mail.com').
-staff(3,3,'Ana','charrada@mail.com').
+staff(1,1,rita,'rti@mail.com').
+staff(2,1,gilberto,'gilberto@mail.com').
+staff(3,1,monica,'saledge@mail.com').
+staff(1,2,joao,'juanito@mail.com').
+staff(2,2,andreia,'zeca@mail.com').
+staff(3,2,belo,'li4@mail.com').
+staff(1,3,rui,'salmon@mail.com').
+staff(2,3,ze,'salmonze@mail.com').
+staff(3,3,ana,'cena@mail.com').
+staff(1,4,guilherme,'ti@mail.com').
+staff(2,4,carolina,'carol@mail.com').
 
-
-%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma↝ { 𝕍, 𝔽 }
+%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma, Fase↝ { 𝕍, 𝔽 }
 
 %vacinacao_Covid(5,8,'14/02/21','outra',0).
 %vacinacao_Covid(2,6,'14/02/21','outra',0).
 %vacinacao_Covid(2,7,'15/02/21','pfizer',0).
-vacinacao_Covid(1,4,01/03/21,pfeizer,1).
-vacinacao_Covid(3,3,01/03/21,pfeizer,1).
-vacinacao_Covid(3,2,21/03/21,pfeizer,1).
-vacinacao_Covid(5,1,14/02/21,pfeizer,1).
-vacinacao_Covid(3,2,21/03/21,pfeizer,2).
-vacinacao_Covid(5,1,21/03/21,pfeizer,2).
+
+
+
+vacinacao_Covid(5,6,14/02/21,pfeizer,1,1).
+vacinacao_Covid(5,6,21/03/21,pfeizer,2,1).
+vacinacao_Covid(1,11,01/03/21,pfeizer,1,1).
+vacinacao_Covid(1,11,01/03/21,pfeizer,2,1).
+vacinacao_Covid(3,1,21/03/21,pfeizer,1,2).
+vacinacao_Covid(3,4,21/03/21,pfeizer,1,2).
+vacinacao_Covid(3,4,21/03/21,pfeizer,2,2).
+%vacina indevida
+vacinacao_Covid(2,7,21/03/21,pfeizer,2,3). %utente vacinado indevidamente
+
+
 
 %profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
-profissoes_risco([medico,enfermeiro,auxiliar_limpeza,auxiliar_lar,professor,auxiliar_escola,policia]).
+profissoes_risco([medico,medica,enfermeiro,enfermeira,auxiliar_limpeza,auxiliar_lar,professor,auxiliar_escola,policia]).
 
 %fase:#utente,fase ↝ { 𝕍, 𝔽 }
 fase(6,1).
+fase(11,1).
+fase(1,2).
+fase(4,2).
+fase(5,2).
 fase(7,2).
+fase(9,2).
+%fase(10,2) - 
 fase(8,3).
 
 
@@ -134,22 +155,26 @@ fase(8,3).
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -VACINACAO_COVID
 %Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de vacinacao_Covid
-+vacinacao_Covid(ID,IDSTAFF,_,_,T) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,T)),S),
++vacinacao_Covid(ID,IDSTAFF,_,_,T,F) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,T,F)),S),
                     comprimento(S,N),
                 N == 1).
 %Invariante Estrutural: Não remover vacinacao que nao esteja na Base de Conhecimento
--vacinacao_Covid(ID,IDSAFF,_,_,_) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,_)),S),
+-vacinacao_Covid(ID,IDSAFF,_,_,_,_) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,_,_)),S),
                     comprimento(S,N),
                     N == 0).
 
 %Invariante Referencial
-+vacinacao_Covid(_,_,_,_,T)::(
++vacinacao_Covid(_,_,_,_,T,_)::(
     T=1; %operador de disjuncao -> ;
     T=2
 ).
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -FASE
 
 
+%Invariante Estrutural: para permitir insercao de ocorrências de conhecimento repetido a nível de fase
++fase(IDU,FASE) :: (findall( (IDU,FASE), (fase(IDU,FASE)),S),
+               	comprimento(S,N),
+                N ==1).
 
 %Invariante Referencial - IDs sao inteiros
 +fase(IDU,IDF) :: (
@@ -158,18 +183,6 @@ fase(8,3).
     IDF=2;
     IDF=3
 ).
-
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
-
-%centro_saude: #Idcentro, Nome, Morada, Telefone, Email ↝ { 𝕍, 𝔽}
-
-%staff: #Idstaff, #Idcentro, Nome, email ↝ { 𝕍, 𝔽 }
-
-%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma↝ { 𝕍, 𝔽 }
-
-
-
 
 %---------------------------QUERIES-----------------------------------
 
@@ -180,9 +193,21 @@ fase(8,3).
 %Pertence à 1ª Fase? 
 %%Utente pertence à 1ª fase de vacinacao se a sua idade for maior ou igual a 65.
 
+
+registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUtenteFase1(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro),
+                                                                    !.
+registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUtenteFase2(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro),
+                                                                    !.
+registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUtenteFase3(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro),
+                                                                    !.
+
+
+
+
 registaUtenteFase1(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):-verificaIdade(X/Y/Z),
                                                                     evolucao(utente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro)),
-                                                                    evolucao(fase(ID,1)).
+                                                                    evolucao(fase(ID,1)),
+                                                                    write('Utente registado em Fase1').
 
 
 verificaIdade(X/Y/Z):- A is 2021-Z,
@@ -194,7 +219,8 @@ verificaIdade(X/Y/Z):- A is 2021-Z,
 registaUtenteFase2(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- comprimento(Doenca,N),
                                                                         N>=1,
                                                                         evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
-                                                                        evolucao(fase(ID,2)).
+                                                                        evolucao(fase(ID,2)),
+                                                                        write('Utente registado em Fase2').
 
 
 
@@ -203,7 +229,8 @@ registaUtenteFase2(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- compri
 registaUtenteFase3(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- profissoes_risco(L),
                                                                         pertence(Prof,L),
                                                                         evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
-                                                                        evolucao(fase(ID,3)).
+                                                                        evolucao(fase(ID,3)),
+                                                                        write('Utente registado em Fase3').
 %--------------------------<2>------------------------------------------------------------------------------
 %Identifica utentes nao vacinados  
 identificaUtentesNaoVacinados(L):- findall((ID),utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),U),
@@ -213,12 +240,12 @@ identificaUtentesNaoVacinados(L):- findall((ID),utente(ID,Seg,Nome,Data,Email,Te
                                 
 
 %--------------------------<3>----------------------------------------------------------------------------------
-%Identifica utentes vacinados 
+%Identifica utentes vacinados Sem ser por ordem
 identificaUtentesVacinados(L):- utentesIdVacinados(N),
                              agrupaUtentesID(N,L).                               
 
-utentesIdVacinados(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1),L1),
-                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2),L2),
+utentesIdVacinados(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
+                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
                     concatenar(L1,L2,X),
                     remove_duplicados(X,L).
 
@@ -228,30 +255,60 @@ agrupaUtentesID([H|T],[X|Xs]):- agrupaUtentesID(T,Xs),
                                 listaUtentes(H,[X]).
 
 %--------------------------<4>-------------------------------------------------------------------------------------
-%Identifica Utentes bem vacinados
-%utentes por toma, neste caso a toma vai ser 2
+%Identificar Utentes vacinados indevidamente
+%Utentes que foram vacinados na fase errada a que pertencem
+identificaUtentesIndevidoVac(L):-findall((IDU,FASE) ,vacinacao_Covid(_,IDU,_,_,_,FASE),L1), %Par com idutente e fase
+                                remove_duplicados(L1,X),
+                                listaFases(L2),%elementos a retirar
+                                eliminarComuns(L2,X,L). %I lista de pares (id,fase) indevidos
+                                %agrupaUtentesID(I,L). %transformar pares em lista de id para dps passar para lista de utentes
 
-identificaUtentesBemVacinados(L):- 
-            findall((IDU), vacinacao_Covid(IDS,IDU,DA,VA,2),LI),
-            agrupaUtentesID(LI,L).
 
 
-%Predicado que lista os utentes por id
-listaUtentes(Id,Lista):-findall((Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),utente(Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),Lista).
+%Predicado que lista o utentes por id
+listaUtentes(Id,L):-findall((Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),utente(Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),L).
+
+%Predicad que lista todas as fase
+listaFases(L):-findall((IDU,FASE), fase(IDU,FASE),L).
+
+
+
+listFaseToListId([],L,L).
+listFaseToListId( [(ID,F)|T] ,N,L):- adicionar(ID,L1,N),
+                                    listFaseToListId(ID,N,L).
+
+adicionar(X,Lista,R):-
+    not(pertence(X,Lista)),
+    insert(X,Lista,R).
+adicionar(X,Lista,Lista):-
+    pertence(X,Lista).
+
+insert(X,[Y|T],[X,Y|T]).
+insert(X,[],[X]).
+
+
+
 %--------------------------<5>--------------------------------------------------------------------------------------
-%Identificar pessoas não vacinadas e que são candidatas a vacinação
-% Ir buscar as pessoas nao vacinadas e verificar se estão na 1ª,2ª ou 3ª fase
+%Identificar Utentes não vacinados e que são candidatas a vacinação por fase
 
-identificaFase(L,N):- findall((ID),fase(ID,N),X),
-                    agrupaUtentesID(X,L).
 
+identificaFase(L,N):-  utentesIdVacinadosFase(X,N), %tenho os utentes vacinados
+                    findall((ID), fase(ID,N),L1), %utentes na fase N
+                    eliminarComuns(X,L1,L2),
+                    agrupaUtentesID(L2,L).
                     
+                    
+%Predicado que retorna os id dos utentes por fase de vacinacao      
+utentesIdVacinadosFase(L,N):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,N),L1),
+                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2,N),L2),
+                    concatenar(L1,L2,X),
+                    remove_duplicados(X,L).              
 
 %--------------------------<6>---------------------------------------------------------------------------------------
-%Identificar pessoas a quem falta a segunda toma da vacina;
+%Identificar Utentes a quem falta a segunda toma da vacina;
 
-identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1),L1),
-                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2),L2),
+identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
+                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
                     eliminarComuns(L2,L1,X),
                     agrupaUtentesID(X,L).
                     
@@ -261,9 +318,8 @@ identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1),L1),
 
 
 % Extensao do meta-predicado nao: Questao -> {V,F}
-si( Questao,verdadeiro ) :- Questao.
-si( Questao,falso ) :- -Questao.
-
+%si( Questao,verdadeiro ) :- Questao.
+%si( Questao,falso ) :- -Questao.
 
 
 
@@ -298,7 +354,7 @@ comprimento([X|L], C) :- comprimento(L, N), C is N+1.
 
 
 
-%Funçao que elimina elementos comuns de uma lista noutra skrskr
+%Extensao do Predicado para eliminar elementos comuns de uma lista noutra skrskr
 %(lista de itens a retirar , lista onde se retira , lista return)
 eliminarComuns([],[],L).
 eliminarComuns(N,[],[]).
