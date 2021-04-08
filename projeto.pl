@@ -13,7 +13,7 @@
 :- dynamic utente/10.
 :- dynamic centro_saude/5.
 :- dynamic staff/4.
-:- dynamic vacinacao_Covid/5.
+:- dynamic vacinacao_Covid/6.
 :- dynamic profissoes_risco/1.
 :- dynamic fase/2.
 
@@ -96,6 +96,8 @@ fase(7,2).
 fase(9,2).
 %fase(10,2) - 
 fase(8,3).
+fase(2,4).
+fase(3,4).
 
 
 
@@ -108,7 +110,7 @@ fase(8,3).
                	comprimento(S,N), N == 1).
 
 %Invariante Estrutural: Não remover utente que nao esteja na Base de Conhecimento
--utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO) :: (findall( (IDU,_,_,_,_,_,_,_,_,IDCENTRO), (utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO)),S),
+-utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO) :: (findall( (IDU,IDCENTRO), (utente(IDU,_,_,_,_,_,_,_,_,IDCENTRO)),S),
                	comprimento(S,N),
                 N ==0).
 
@@ -139,11 +141,11 @@ fase(8,3).
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -STAFF
 
 %Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de staff 
-+staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO,_,_), (staff(IDS,IDCENTRO,_,_)),S),
++staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO), (staff(IDS,IDCENTRO,_,_)),S),
                	comprimento(S,N),
                 N ==1).
 %Invariante Estrutural: Não remover staff que nao esteja na Base de Conhecimento
--staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO,_,_), (staff(IDS,IDCENTRO,_,_)),S),
+-staff(IDS,IDCENTRO,_,_) :: (findall( (IDS,IDCENTRO), (staff(IDS,IDCENTRO,_,_)),S),
                	comprimento(S,N),
                 N ==0).
 
@@ -155,16 +157,16 @@ fase(8,3).
 
 %%--------------------------------- - - - - - - - - - -  -  -  -  -   -VACINACAO_COVID
 %Invariante Estrutural: para permitir inserção de ocorrências de conhecimento repetido a nivel de vacinacao_Covid
-+vacinacao_Covid(ID,IDSTAFF,_,_,T,F) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,T,F)),S),
++vacinacao_Covid(ID,IDSTAFF,_,_,T,F) :: (findall( (ID,IDSTAFF,T,F), (vacinacao_Covid(ID,IDSTAFF,_,_,T,F)),S),
                     comprimento(S,N),
                 N == 1).
 %Invariante Estrutural: Não remover vacinacao que nao esteja na Base de Conhecimento
--vacinacao_Covid(ID,IDSAFF,_,_,_,_) :: (findall((ID,IDSTAFF), (vacinacao_Covid(ID,IDSTAFF,_,_,_,_)),S),
+-vacinacao_Covid(ID,IDSTAFF,_,_,T,F) :: (findall( (ID,IDSTAFF,T,F), (vacinacao_Covid(ID,IDSTAFF,_,_,T,F)),S),
                     comprimento(S,N),
                     N == 0).
 
 %Invariante Referencial
-+vacinacao_Covid(_,_,_,_,T,_)::(
++vacinacao_Covid(_,_,_,_,T,_) :: (
     T=1; %operador de disjuncao -> ;
     T=2
 ).
@@ -181,14 +183,15 @@ fase(8,3).
 	integer(IDU),
     IDF = 1;
     IDF=2;
-    IDF=3
+    IDF=3;
+    IDF=4
 ).
 
 %---------------------------QUERIES-----------------------------------
 
-%--------------------------<1>---------------------------------------------------------------------------
+%--------------------------<1>--------------------------------------------------------------------------------
 
-%definir predicados para as diferentes fases de vacinacao
+%Definir predicados para as diferentes fases de vacinacao
 
 %Pertence à 1ª Fase? 
 %%Utente pertence à 1ª fase de vacinacao se a sua idade for maior ou igual a 65.
@@ -200,6 +203,8 @@ registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUte
                                                                     !.
 registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUtenteFase3(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro),
                                                                     !.
+registaUtente(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro):- registaUtenteFase4(ID,Seg,Nome,X/Y/Z,Email,Tel,Mor,Prof,Doenca,IDCentro),
+                                                                    !.                                                                   
 
 
 
@@ -231,14 +236,32 @@ registaUtenteFase3(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- profis
                                                                         evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
                                                                         evolucao(fase(ID,3)),
                                                                         write('Utente registado em Fase3').
+
+%Pertence à 4ª Fase?
+%Utente pertence à 4ª fase de vacinacao se não pertencer a nenhuma das acima
+registaUtenteFase4(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro):- evolucao(utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro)),
+                                                                        evolucao(fase(ID,4)),
+                                                                        write('Utente registado em Fase4').
+
+%Registar Staff
+registaStaff(IDS,IDC,Nome,Email):- evolucao(staff(IDS,IDC,Nome,Email)),
+                               write('Staff Registado').
+%Registar Centro_saude
+registaCentro(IDC,Nome,Morada,Telefone,Email):-evolucao(centro_saude(IDC,Nome,Morada,Telefone,Email)),
+                                            write('Centro de Saude Registado').
+
+
+%Registar Vacinacao_Covid
+registaVac(ID,IDSTAFF,_,_,T,F):-evolucao(vacinacao_Covid(ID,IDSTAFF,_,_,T,F)),
+                                    write('Vacinacao_Covid Registada').
+
 %--------------------------<2>------------------------------------------------------------------------------
 %Identifica utentes nao vacinados  
 identificaUtentesNaoVacinados(L):- findall((ID),utente(ID,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro),U),
                                   utentesIdVacinados(N),
                                   eliminarComuns(N,U,X),
                                   agrupaUtentesID(X,L).
-                                
-
+                           
 %--------------------------<3>----------------------------------------------------------------------------------
 %Identifica utentes vacinados Sem ser por ordem
 identificaUtentesVacinados(L):- utentesIdVacinados(N),
@@ -257,11 +280,12 @@ agrupaUtentesID([H|T],[X|Xs]):- agrupaUtentesID(T,Xs),
 %--------------------------<4>-------------------------------------------------------------------------------------
 %Identificar Utentes vacinados indevidamente
 %Utentes que foram vacinados na fase errada a que pertencem
-identificaUtentesIndevidoVac(L):-findall((IDU,FASE) ,vacinacao_Covid(_,IDU,_,_,_,FASE),L1), %Par com idutente e fase
-                                remove_duplicados(L1,X),
+identificaUtentesIndevidoVac(L):-findall((IDU,FASE) ,vacinacao_Covid(_,IDU,_,_,_,FASE),L1), 
+                                remove_duplicados(L1,X),%Par com idutente e fase
                                 listaFases(L2),%elementos a retirar
-                                eliminarComuns(L2,X,L). %I lista de pares (id,fase) indevidos
-                                %agrupaUtentesID(I,L). %transformar pares em lista de id para dps passar para lista de utentes
+                                eliminarComuns(L2,X,I), %I lista de pares (id,fase) indevidos
+                                listFaseToListId(I,IDs),
+                                agrupaUtentesID(IDs,L). %transformar pares em lista de id para dps passar para lista de utentes
 
 
 
@@ -273,18 +297,12 @@ listaFases(L):-findall((IDU,FASE), fase(IDU,FASE),L).
 
 
 
-listFaseToListId([],L,L).
-listFaseToListId( [(ID,F)|T] ,N,L):- adicionar(ID,L1,N),
-                                    listFaseToListId(ID,N,L).
+listFaseToListId([],L).
+listFaseToListId([(ID,F)],L):- append([ID],[],L).
+listFaseToListId( [(ID,F)|T] ,L):- append([ID],N,L),
+                                listFaseToListId(T,N).
 
-adicionar(X,Lista,R):-
-    not(pertence(X,Lista)),
-    insert(X,Lista,R).
-adicionar(X,Lista,Lista):-
-    pertence(X,Lista).
 
-insert(X,[Y|T],[X,Y|T]).
-insert(X,[],[X]).
 
 
 
@@ -312,16 +330,13 @@ identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
                     eliminarComuns(L2,L1,X),
                     agrupaUtentesID(X,L).
                     
-
-%--------------------------<7>-------------------------------------
+%--------------------------<7>---------------------------------------------------------------------------------------
 %Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas.
 
 
 % Extensao do meta-predicado nao: Questao -> {V,F}
-%si( Questao,verdadeiro ) :- Questao.
-%si( Questao,falso ) :- -Questao.
-
-
+si( Questao,verdadeiro ) :- Questao.
+si( Questao,falso ) :- -Questao.
 
 
 %------------------------------- Funçoes Auxiliares -----------------
