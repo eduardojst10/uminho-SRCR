@@ -22,7 +22,7 @@
 % utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
 %centro_saude: #Idcentro, Nome, Morada, Telefone, Email ↝ { 𝕍, 𝔽}
 %staff: #Idstaff, #Idcentro, Nome, email ↝ { 𝕍, 𝔽 }
-%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma↝ { 𝕍, 𝔽 }
+%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma,Fase↝ { 𝕍, 𝔽 }
 %profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
 %fase:#utente,fase ↝ { 𝕍, 𝔽 }
 
@@ -69,14 +69,15 @@ staff(2,4,carolina,'carol@mail.com').
 
 %vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma, Fase↝ { 𝕍, 𝔽 } 
 vacinacao_Covid(5,6,14/02/21,pfeizer,1,1).
-vacinacao_Covid(5,6,21/03/21,pfeizer,2,1).
+vacinacao_Covid(5,6,21/04/21,pfeizer,2,1).
 vacinacao_Covid(1,11,01/03/21,pfeizer,1,1).
-vacinacao_Covid(1,11,01/03/21,pfeizer,2,1).
+vacinacao_Covid(1,11,01/04/21,pfeizer,2,1).
 vacinacao_Covid(3,1,21/03/21,pfeizer,1,2).
 vacinacao_Covid(3,4,21/03/21,pfeizer,1,2).
-vacinacao_Covid(3,4,21/03/21,pfeizer,2,2).
+vacinacao_Covid(3,4,21/04/21,pfeizer,2,2).
 vacinacao_Covid(2,7,21/03/21,pfeizer,1,3). %utente vacinado indevidamente para dar exemplo utente 7 pertence a fase 2 e não 3
 vacinacao_Covid(2,8,22/03/21,pfeizer,1,2). %utente vacinado indevidamente para dar exemplo utente 8 pertence a fase 3 e não 2
+vacinacao_Covid(2,8,22/04/21,pfeizer,2,2). %utente vacinado indevidamente para dar exemplo utente 8 pertence a fase 3 e não 2
 
 %profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
 profissoes_risco([medico,medica,enfermeiro,enfermeira,auxiliar_limpeza,auxiliar_lar,professor,auxiliar_escola,policia]).
@@ -295,6 +296,18 @@ listFaseToListId([(ID,F)],L):- append([ID],[],L).
 listFaseToListId( [(ID,F)|T] ,L):- append([ID],N,L),
                                 listFaseToListId(T,N).
 
+
+%IdentificarUtentesBemVac
+%Todos os utentes bem vacinados que tenham o numero de tomas de vacinas correto
+
+identificaUtentesBemVac(L):- findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L1),
+                            identificaUtentesIndevidoVac(L2),
+                            listFaseToListId(L2,X),
+                            eliminarComuns(X,L1,N),
+                            agrupaUtentesID(N,L).
+
+
+
 %--------------------------<5>--------------------------------------------------------------------------------------
 %Identificar Utentes não vacinados e que são candidatas a vacinação por fase
 
@@ -311,12 +324,14 @@ utentesIdVacinadosFase(L,N):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,N),L1),
                     remove_duplicados(X,L).              
 
 %--------------------------<6>---------------------------------------------------------------------------------------
-%Identificar Utentes para já vacinados com toma 1 a quem falta a segunda toma da vacina;
+%Identificar Utentes para já devidamente vacinados com toma 1 a quem falta a segunda toma da vacina;
 
 identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
                     findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
-                    eliminarComuns(L2,L1,X),
-                    agrupaUtentesID(X,L).
+                    eliminarComuns(L2,L1,L),
+                    agrupaUtentesID(X,T), %utentes devidamente e indevidamente vacinados a quem falta 2ªa toma
+                    identificaUtentesIndevidoVac(I), %utentes indevidademente vacinados
+                    eliminarComuns(I,T,L).
                     
 %--------------------------<7>---------------------------------------------------------------------------------------
 %Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas.
