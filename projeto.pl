@@ -17,6 +17,7 @@
 :- dynamic vacinacao_Covid/6.
 :- dynamic profissoes_risco/1.
 :- dynamic fase/2.
+:- dynamic '-'/1.
 
 
 % utente: #Idutente, Nº Segurança_Social, Nome, Data_Nasc, Email, Telefone, Morada, Profissão, [Doenças_Crónicas], #CentroSaúde ↝ { 𝕍, 𝔽}
@@ -328,7 +329,7 @@ utentesIdVacinadosFase(L,N):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,N),L1),
 
 identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
                     findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
-                    eliminarComuns(L2,L1,L),
+                    eliminarComuns(L2,L1,X),
                     agrupaUtentesID(X,T), %utentes devidamente e indevidamente vacinados a quem falta 2ªa toma
                     identificaUtentesIndevidoVac(I), %utentes indevidademente vacinados
                     eliminarComuns(I,T,L).
@@ -337,7 +338,7 @@ identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
 %Desenvolver um sistema de inferência capaz de implementar os mecanismos de raciocínio inerentes a estes sistemas.
 
 
-% Extensao do meta-predicado nao: Questao -> {V,F}
+% Sistema de inferência: Resposta -> {V,F}
 si( Questao,verdadeiro ) :- Questao.
 si( Questao,falso ) :- -Questao.
 
