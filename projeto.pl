@@ -341,6 +341,12 @@ identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
 % Sistema de inferência: Resposta -> {V,F}
 si( Questao,verdadeiro ) :- Questao.
 si( Questao,falso ) :- -Questao.
+si(Questao,desconhecido):- nao(Questao), %se conhecimento nao existe então é desconhecido
+                        nao(-Questao).
+%Predicado que se não for possivel ver que questao é verdadeiro entao é falso
+nao(Questao):-
+    Questao,!,fail.
+nao(Questao).
 
 
 %------------------------------- Funçoes Auxiliares -----------------
