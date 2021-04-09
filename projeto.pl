@@ -6,6 +6,7 @@
 %:- set_prolog_flag(discontiguous_warnings,off).
 %:- set_prolog_flag(single_var_warnings,off).
 :- set_prolog_flag(w:unknown,fail).
+:- set_prolog_flag(answer_write_options,[ quoted(true),portray(true),spacing(next_argument)]). %precisamos desta flag pois existem factos que ultrapassam o numero default de elementos no compilador
 :- style_check(-singleton).
 :- style_check(-discontiguous).
 
@@ -22,6 +23,8 @@
 %centro_saude: #Idcentro, Nome, Morada, Telefone, Email ↝ { 𝕍, 𝔽}
 %staff: #Idstaff, #Idcentro, Nome, email ↝ { 𝕍, 𝔽 }
 %vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma↝ { 𝕍, 𝔽 }
+%profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
+%fase:#utente,fase ↝ { 𝕍, 𝔽 }
 
 
 %----------------------------- BASE DE CONHECIMENTO ------------------------
@@ -63,14 +66,8 @@ staff(3,3,ana,'cena@mail.com').
 staff(1,4,guilherme,'ti@mail.com').
 staff(2,4,carolina,'carol@mail.com').
 
-%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma, Fase↝ { 𝕍, 𝔽 }
 
-%vacinacao_Covid(5,8,'14/02/21','outra',0).
-%vacinacao_Covid(2,6,'14/02/21','outra',0).
-%vacinacao_Covid(2,7,'15/02/21','pfizer',0).
-
-
-
+%vacinacao_Covid: #Staf, #utente, Data, Vacina, Toma, Fase↝ { 𝕍, 𝔽 } 
 vacinacao_Covid(5,6,14/02/21,pfeizer,1,1).
 vacinacao_Covid(5,6,21/03/21,pfeizer,2,1).
 vacinacao_Covid(1,11,01/03/21,pfeizer,1,1).
@@ -78,10 +75,8 @@ vacinacao_Covid(1,11,01/03/21,pfeizer,2,1).
 vacinacao_Covid(3,1,21/03/21,pfeizer,1,2).
 vacinacao_Covid(3,4,21/03/21,pfeizer,1,2).
 vacinacao_Covid(3,4,21/03/21,pfeizer,2,2).
-%vacina indevida
-vacinacao_Covid(2,7,21/03/21,pfeizer,2,3). %utente vacinado indevidamente
-
-
+vacinacao_Covid(2,7,21/03/21,pfeizer,1,3). %utente vacinado indevidamente para dar exemplo utente 7 pertence a fase 2 e não 3
+vacinacao_Covid(2,8,22/03/21,pfeizer,1,2). %utente vacinado indevidamente para dar exemplo utente 8 pertence a fase 3 e não 2
 
 %profissoes_risco:[Profissão]↝ { 𝕍, 𝔽 }
 profissoes_risco([medico,medica,enfermeiro,enfermeira,auxiliar_limpeza,auxiliar_lar,professor,auxiliar_escola,policia]).
@@ -94,12 +89,10 @@ fase(4,2).
 fase(5,2).
 fase(7,2).
 fase(9,2).
-%fase(10,2) - 
+fase(10,2). 
 fase(8,3).
 fase(2,4).
 fase(3,4).
-
-
 
 
 %------------------------------- Invariantes Estruturais ------------------------------
@@ -261,21 +254,21 @@ identificaUtentesNaoVacinados(L):- findall((ID),utente(ID,Seg,Nome,Data,Email,Te
                                   utentesIdVacinados(N),
                                   eliminarComuns(N,U,X),
                                   agrupaUtentesID(X,L).
-                           
-%--------------------------<3>----------------------------------------------------------------------------------
-%Identifica utentes vacinados Sem ser por ordem
-identificaUtentesVacinados(L):- utentesIdVacinados(N),
-                             agrupaUtentesID(N,L).                               
-
-utentesIdVacinados(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
-                    findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
-                    concatenar(L1,L2,X),
-                    remove_duplicados(X,L).
 
 %predicado que agrupa os Utentes dado uma lista de IDs
 agrupaUtentesID([],[]).
 agrupaUtentesID([H|T],[X|Xs]):- agrupaUtentesID(T,Xs),
                                 listaUtentes(H,[X]).
+                           
+%--------------------------<3>----------------------------------------------------------------------------------
+%Identifica utentes vacinados Sem ser por ordem
+%Utentes que foram vacinados pelo menos uma vez
+identificaUtentesVacinados(L):- utentesIdVacinados(N),
+                             agrupaUtentesID(N,L).                               
+
+utentesIdVacinados(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L).
+
+
 
 %--------------------------<4>-------------------------------------------------------------------------------------
 %Identificar Utentes vacinados indevidamente
@@ -296,19 +289,14 @@ listaUtentes(Id,L):-findall((Id,Seg,Nome,Data,Email,Tel,Mor,Prof,Doenca,IDCentro
 listaFases(L):-findall((IDU,FASE), fase(IDU,FASE),L).
 
 
-
+%Predicado que converte uma list de Fases para uma List de IDs
 listFaseToListId([],L).
 listFaseToListId([(ID,F)],L):- append([ID],[],L).
 listFaseToListId( [(ID,F)|T] ,L):- append([ID],N,L),
                                 listFaseToListId(T,N).
 
-
-
-
-
 %--------------------------<5>--------------------------------------------------------------------------------------
 %Identificar Utentes não vacinados e que são candidatas a vacinação por fase
-
 
 identificaFase(L,N):-  utentesIdVacinadosFase(X,N), %tenho os utentes vacinados
                     findall((ID), fase(ID,N),L1), %utentes na fase N
@@ -323,7 +311,7 @@ utentesIdVacinadosFase(L,N):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,N),L1),
                     remove_duplicados(X,L).              
 
 %--------------------------<6>---------------------------------------------------------------------------------------
-%Identificar Utentes a quem falta a segunda toma da vacina;
+%Identificar Utentes para já vacinados com toma 1 a quem falta a segunda toma da vacina;
 
 identificaFaltaToma2(L):-findall((IDU),vacinacao_Covid(_,IDU,_,_,1,_),L1),
                     findall((IDU), vacinacao_Covid(_,IDU,_,_,2,_),L2),
@@ -395,7 +383,7 @@ evolucao(Termo):- findall(Invariante,+Termo::Invariante,Lista),
 insercao(Termo):- assert(Termo).
 insercao(Termo):- retract(Termo), !, fail. %cut operator para 
 
-%Involucao - remocao de termo
+%Involucao - remocao de Termo
 
 involucao(Termo):- findall(Invariante,-Termo::Invariante,Lista),
     remocao(Termo),
