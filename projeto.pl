@@ -358,7 +358,7 @@ pertence(X,[H|T]):-pertence(X,T).
 teste([]).
 teste([R|Lr]):- R, teste(Lr).
 
-%Predicado que faz concat de T e Lista para se tornar Xs
+%Predicado que faz concat de T e Lista 
 concatenar([],L,L).
 concatenar(L,[],L).
 concatenar([H | T], L, [H | R]) :- concatenar(T,L,R).
